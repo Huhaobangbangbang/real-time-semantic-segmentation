@@ -9,17 +9,32 @@ import os
 from gerber import load_layer
 from gerber.render import RenderSettings, theme
 from gerber.render.cairo_backend import GerberCairoContext
+def create_png(img_path):
+    copper = load_layer(img_path)
+    ctx = GerberCairoContext()
+    ctx.render_layer(copper)
+    # # Write output to png file
+    ctx.dump('/Users/huhao/Downloads/template/png/test3.png')
 
 
-our_settings = RenderSettings(color=theme.COLORS['white'], alpha=0.85)
-copper = load_layer('/Users/huhao/Downloads/test.gtl')
 
-# Create a new drawing context
-ctx = GerberCairoContext()
+def create_svg(img_path):
+    """利用gl2生成svg"""
+    import gerber
+    from gerber.render import GerberCairoContext
 
-# Draw the copper layer. render_layer() uses the default color scheme for the
-# layer, based on the layer type. Copper layers are rendered as
-ctx.render_layer(copper)
+    # Read gerber and Excellon files
+    top_copper = gerber.read(img_path)
+    nc_drill = gerber.read('example.txt')
 
-# Write output to png file
-#ctx.dump('/Users/huhao/Downloads/test.png')
+    # Rendering context
+    ctx = GerberCairoContext()
+
+    # Create SVG image
+    top_copper.render(ctx)
+    nc_drill.render(ctx, '/Users/huhao/Downloads/template/png/test.svg')
+
+if __name__ == '__main__':
+    img_path = '/Users/huhao/Downloads/template/1082s433367a.gl2'
+    #create_png(img_path)
+    create_svg(img_path)
