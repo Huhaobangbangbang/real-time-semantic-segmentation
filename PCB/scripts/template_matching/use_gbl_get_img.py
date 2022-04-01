@@ -1,8 +1,3 @@
-"""
- -*- coding: utf-8 -*-
- author： Hao Hu
- @date   2022/3/18 8:01 PM
-"""
 import gerber
 from gerber.render import GerberCairoContext
 import os

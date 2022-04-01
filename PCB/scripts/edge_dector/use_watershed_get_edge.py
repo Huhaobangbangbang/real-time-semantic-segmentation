@@ -12,27 +12,35 @@ def get_background(background_img_path,fore_img_path):
     """得到背景和前景区域"""
     background_hint = cv2.imread(background_img_path)
     fore_hint = cv2.imread(fore_img_path)
-    background_hint = erode_dilate(background_hint)
-    fore_hint = erode_dilate(fore_hint)
-
-
     b_where_255 = np.where(background_hint == 255)
     f_where_255 = np.where(fore_hint == 255)
-    background_matrix = np.zeros((512, 512, 3), dtype = "uint8")
-    fore_matrix  = np.zeros((512, 512, 3), dtype = "uint8")
-    background_matrix[b_where_255]=255
+    background_matrix = np.zeros((512, 512, 3), dtype="uint8")
+    fore_matrix = np.zeros((512, 512, 3), dtype="uint8")
+    background_matrix[b_where_255] = 255
     background_matrix[f_where_255] = 255
     background_where_0 = np.where(background_matrix == 0)
     fore_matrix[background_where_0] = 255
 
-    return background_matrix,fore_matrix
+    return background_matrix, fore_matrix
 
 
 def erode_dilate(img_ori):
     """腐蚀"""
     # 开始进行腐蚀操作
-    retVal, image = cv2.threshold(img_ori, 200, 255, cv2.THRESH_BINARY)
-    corrosion_img = cv2.getStructuringElement(cv2.MORPH_CROSS, (2, 2))  ##腐蚀预处理，确定处理核的大小,矩阵操作
+
+    retVal, image = cv2.threshold(img_ori, 150, 255, cv2.THRESH_BINARY)
+    corrosion_img = cv2.getStructuringElement(cv2.MORPH_CROSS, (2,2))  ##腐蚀预处理，确定处理核的大小,矩阵操作
+    pic_matrix = cv2.erode(image, corrosion_img, iterations=10)  # 进行腐蚀操作
+
+    return pic_matrix
+
+
+def erode_dilate2(img_ori):
+    """腐蚀"""
+    # 开始进行腐蚀操作
+
+    retVal, image = cv2.threshold(img_ori, 150, 255, cv2.THRESH_BINARY)
+    corrosion_img = cv2.getStructuringElement(cv2.MORPH_CROSS, (3,3))  ##腐蚀预处理，确定处理核的大小,矩阵操作
     pic_matrix = cv2.erode(image, corrosion_img, iterations=10)  # 进行腐蚀操作
 
     return pic_matrix
@@ -76,8 +84,8 @@ def use_watershed_get_edge(img_path, background_hint, fore_hint):
     unknow = cv2.subtract(sure_bg, sure_fg)
     # Step7. 连通区域处理
     ret, markers = cv2.connectedComponents(sure_fg, connectivity=8)  # 对连通区域进行标号  序号为 0 - N-1
-    #markers = markers + 1
-    #markers[unknow == 255] = 0
+    # markers = markers + 1
+    markers[unknow == 255] = 0
     markers = get_new_markers(markers, background_hint, fore_hint)
     # 分水岭算法
     markers = cv2.watershed(img, markers)  # 分水岭算法后，所有轮廓的像素点被标注为  -1
@@ -89,14 +97,14 @@ def use_watershed_get_edge(img_path, background_hint, fore_hint):
 
 if __name__ == '__main__':
     ori_folder = '/Users/huhao/Documents/GitHub/real-time-semantic-segmentation/PCB/pcb_small'
-    img_name = '20211022_10583-0-01-7_fake_B.png'
+    img_name = '20211023_1037-0-01-14_fake_B.png'
     img_path = osp.join(ori_folder,img_name)
     background_img_path = osp.join(ori_folder, osp.basename(img_path[:-4]) + '_bg_mask.jpg')
     fore_img_path = osp.join(ori_folder, osp.basename(img_path[:-4]) + '_copper_mask.jpg')
     background_hint, fore_hint = get_background(background_img_path, fore_img_path)
-
-    # background_hint = erode_dilate(background_matrix)
-    # fore_hint = erode_dilate(fore_matrix)
+    background_hint = expand(background_hint)
+    fore_hint = erode_dilate(fore_hint)
+    background_hint = erode_dilate2(background_hint)
 
 
     use_watershed_get_edge(img_path, background_hint, fore_hint)
