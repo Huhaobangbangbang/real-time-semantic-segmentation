@@ -106,5 +106,4 @@ if __name__ == '__main__':
     fore_hint = erode_dilate(fore_hint)
     background_hint = erode_dilate2(background_hint)
 
-
     use_watershed_get_edge(img_path, background_hint, fore_hint)
