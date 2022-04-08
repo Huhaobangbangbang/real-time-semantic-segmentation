@@ -26,7 +26,6 @@ def template_match(ori_img_path,template_path):
         index = index + 1
         bottom_right = (pt[0] + w, pt[1] + h)
         cv2.rectangle(ori_img, pt, bottom_right, (0, 255, 0), 5)
-    print('fuck you')
     end_img_path = osp.join('/Users/huhao/Downloads/result',osp.basename(ori_img_path))
     cv2.imwrite(end_img_path, ori_img)
 
